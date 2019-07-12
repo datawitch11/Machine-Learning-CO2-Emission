@@ -1,0 +1,448 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[117]:
+
+
+import itertools
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.ticker import NullFormatter
+import pandas as pd
+import numpy as np
+import matplotlib.ticker as ticker
+from sklearn import preprocessing
+get_ipython().run_line_magic('matplotlib', 'inline')
+
+
+# In[118]:
+
+
+df=pd.read_csv('churn.csv')
+
+
+# In[119]:
+
+
+df
+
+
+# In[120]:
+
+
+np.where(pd.isnull(df)) #returns the row and column indices where the value is NaN:
+
+
+# __detecting numbers in string containing column, and changing them to NaN, good for cleaning__
+
+# In[121]:
+
+
+# Detecting numbers 
+#cnt=0
+#for row in df['gender']:
+ #   try:
+  #      int(row)
+    #    df.loc[cnt, 'gender']=np.nan
+    #except ValueError:
+     #   pass
+    #cnt+=1
+
+
+# __check where Nan values are in three different forms__
+
+# In[122]:
+
+
+#list(map(tuple, np.where(np.isnan(x))))
+
+
+# In[123]:
+
+
+df.isnull().stack()[lambda x: x].index.tolist()
+
+
+# In[124]:
+
+
+np.where(pd.isnull(df)) #returns the row and column indices where the value is NaN:
+
+
+# In[125]:
+
+
+df.Churn.value_counts()
+
+
+# In[126]:
+
+
+print ("Rows     : " ,df.shape[0])
+print ("Columns  : " ,df.shape[1])
+print ("\nFeatures : \n" ,df.columns.tolist())
+print ("\nMissing values :  ", df.isnull().sum().values.sum())
+print ("\nUnique values :  \n",df.nunique())
+
+
+# In[127]:
+
+
+df['TotalCharges'] = df["TotalCharges"].replace(" ",np.nan)
+df["TotalCharges"] = df["TotalCharges"].astype(float)
+
+
+# In[128]:
+
+
+np.where(pd.isnull(df)) #returns the row and column indices where the value is NaN:
+
+
+# In[129]:
+
+
+df = df[df["TotalCharges"].notnull()]
+df = df.reset_index()[df.columns]
+
+
+# In[130]:
+
+
+np.where(pd.isnull(df)) #returns the row and column indices where the value is NaN:
+
+
+# In[131]:
+
+
+#replace 'No internet service' to No for the following columns
+replace_cols = [ 'OnlineSecurity', 'MultipleLines', 'DeviceProtection',
+                'TechSupport','StreamingTV', 'StreamingMovies']
+for i in replace_cols : 
+    df[i]  = df[i].replace({'No internet service' : 'No'})
+    df[i]  = df[i].replace({'No phone service' : 'No'})
+
+
+#Tenure to categorical column
+def tenure_lab(df) :
+    
+    if df["tenure"] <= 12 :
+        return "1"
+    elif (df["tenure"] > 12) & (df["tenure"] <= 24 ):
+        return "2"
+    elif (df["tenure"] > 24) & (df["tenure"] <= 48) :
+        return "3"
+    elif (df["tenure"] > 48) & (df["tenure"] <= 60) :
+        return "4"
+    elif df["tenure"] > 60 :
+        return "5"
+df["tenure_group"] = df.apply(lambda df:tenure_lab(df),
+                                      axis = 1)
+
+
+# In[ ]:
+
+
+np.where(pd.isnull(df)) #returns the row and column indices where the value is NaN:
+
+
+# In[133]:
+
+
+df
+
+
+# In[134]:
+
+
+#changes genders to binary with male=1 and famale=0
+cnt=0
+for row in df['gender']:
+    if (df.loc[cnt, 'gender']=="Male"):
+         df.loc[cnt, 'gender']=1
+    else:
+        df.loc[cnt, 'gender']=0
+    cnt+=1
+#changes SeniorCitizen to binary with yes=1 and no=0
+cnt=0
+for row in df['SeniorCitizen']:
+    if (df.loc[cnt, 'SeniorCitizen']=="Yes"):
+         df.loc[cnt, 'SeniorCitizen']=1
+    else:
+        df.loc[cnt, 'SeniorCitizen']=0
+    cnt+=1
+#changes Partner to binary with yes=1 and no=0
+cnt=0
+for row in df['Partner']:
+    if (df.loc[cnt, 'Partner']=="Yes"):
+         df.loc[cnt, 'Partner']=1
+    else:
+        df.loc[cnt, 'Partner']=0
+    cnt+=1
+
+#changes PhoneService to binary with yes=1 and no=0
+cnt=0
+for row in df['PhoneService']:
+    if (df.loc[cnt, 'PhoneService']=="Yes"):
+         df.loc[cnt, 'PhoneService']=1
+    else:
+        df.loc[cnt, 'PhoneService']=0
+    cnt+=1
+#changes Churn to binary with yes=1 and no=0
+cnt=0
+for row in df['Churn']:
+    if (df.loc[cnt, 'Churn']=="Yes"):
+         df.loc[cnt, 'Churn']=1
+    else:
+        df.loc[cnt, 'Churn']=0
+    cnt+=1
+
+
+# In[135]:
+
+
+np.where(pd.isnull(df)) #returns the row and column indices where the value is NaN:
+
+
+# In[136]:
+
+
+df
+
+
+# In[137]:
+
+
+df["gender"] = df["gender"].astype(float)
+df["Partner"] = df["Partner"].astype(float)
+df["tenure_group"] = df["tenure_group"].astype(float)
+df["PhoneService"] = df["PhoneService"].astype(float)
+df["SeniorCitizen"] = df["SeniorCitizen"].astype(float)
+
+
+np.where(pd.isnull(df)) #returns the row and column indices where the value is NaN:
+
+
+# In[138]:
+
+
+x=df[['gender','SeniorCitizen','Partner','tenure_group','PhoneService','MonthlyCharges','TotalCharges']].values
+
+
+# In[139]:
+
+
+xdf=df[['gender','SeniorCitizen','Partner','tenure_group','PhoneService','MonthlyCharges','TotalCharges','Churn']]
+
+
+# In[140]:
+
+
+xdf
+
+
+# In[141]:
+
+
+np.where(pd.isnull(xdf)) #returns the row and column indices where the value is NaN:
+
+
+# In[142]:
+
+
+np.set_printoptions(suppress=True)
+x
+
+
+# In[143]:
+
+
+y = df['Churn'].values
+
+
+# In[144]:
+
+
+y
+
+
+# In[145]:
+
+
+x = preprocessing.StandardScaler().fit(x).transform(x.astype(float))
+
+
+# __when using KNN, all values should be numerical (continous or ordinal) bcoz it has to be numpy array, the process of changing categorical to ordinal is called one hot encoding__
+# 
+# Hot encoding turns a column with n caegories to n columns. Dummy coding just assigns a number to the parameters.
+
+# In[146]:
+
+
+x
+
+
+# In[147]:
+
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split( x, y, test_size=0.2, random_state=4)
+print ('Train set:', X_train.shape,  y_train.shape)
+print ('Test set:', X_test.shape,  y_test.shape)
+
+
+# In[148]:
+
+
+from sklearn.neighbors import KNeighborsClassifier
+
+
+# In[149]:
+
+
+k = 4
+#Train Model and Predict  
+neigh = KNeighborsClassifier(n_neighbors = k).fit(X_train,y_train)
+neigh
+
+
+# In[150]:
+
+
+yhat = neigh.predict(X_test)
+yhat[0:5]
+
+
+# In[151]:
+
+
+from sklearn import metrics
+print("Train set Accuracy: ", metrics.accuracy_score(y_train, neigh.predict(X_train)))
+print("Test set Accuracy: ", metrics.accuracy_score(y_test, yhat))
+
+
+# In[152]:
+
+
+k = 6
+#Train Model and Predict  
+neigh = KNeighborsClassifier(n_neighbors = k).fit(X_train,y_train)
+neigh
+yhat = neigh.predict(X_test)
+yhat[0:5]
+from sklearn import metrics
+print("Train set Accuracy: ", metrics.accuracy_score(y_train, neigh.predict(X_train)))
+print("Test set Accuracy: ", metrics.accuracy_score(y_test, yhat))
+
+
+# In[153]:
+
+
+Ks = 20
+mean_acc = np.zeros((Ks-1))
+std_acc = np.zeros((Ks-1))
+ConfustionMx = [];
+for n in range(1,Ks):
+    
+    #Train Model and Predict  
+    neigh = KNeighborsClassifier(n_neighbors = n).fit(X_train,y_train)
+    yhat=neigh.predict(X_test)
+    mean_acc[n-1] = metrics.accuracy_score(y_test, yhat)
+
+    
+    std_acc[n-1]=np.std(yhat==y_test)/np.sqrt(yhat.shape[0])
+
+mean_acc
+
+
+# In[154]:
+
+
+plt.plot(range(1,Ks),mean_acc,'g')
+plt.fill_between(range(1,Ks),mean_acc - 1 * std_acc,mean_acc + 1 * std_acc, alpha=0.10)
+plt.legend(('Accuracy ', '+/- 3xstd'))
+plt.ylabel('Accuracy ')
+plt.xlabel('Number of Nabors (K)')
+plt.tight_layout()
+plt.show()
+
+
+# In[155]:
+
+
+print( "The best accuracy was with", mean_acc.max(), "with k=", mean_acc.argmax()+1) 
+
+
+# In[156]:
+
+
+from sklearn.model_selection import train_test_split
+
+
+# In[157]:
+
+
+X_trainset, X_testset, y_trainset, y_testset = train_test_split(x, y, test_size=0.3, random_state=3)
+
+
+# In[194]:
+
+
+from sklearn.tree import DecisionTreeClassifier
+drugTree = DecisionTreeClassifier(criterion="entropy",max_depth=2)
+drugTree # it shows the default parameters
+
+
+# In[195]:
+
+
+drugTree.fit(X_trainset,y_trainset)
+
+
+# In[196]:
+
+
+predTree = drugTree.predict(X_testset)
+
+
+# In[197]:
+
+
+print (predTree [0:5])
+
+
+# In[198]:
+
+
+print (predTree [0:5])
+print (y_testset [0:5])
+
+
+# In[199]:
+
+
+from sklearn import metrics
+import matplotlib.pyplot as plt
+print("DecisionTrees's Accuracy: ", metrics.accuracy_score(y_testset, predTree))
+
+
+# In[200]:
+
+
+from sklearn.externals.six import StringIO  
+from IPython.display import Image  
+from sklearn.tree import export_graphviz
+import pydotplus
+columns = xdf.columns[0:7]
+dot_data = StringIO()
+export_graphviz(drugTree, out_file=dot_data,feature_names = columns, class_names=["Not churn","Churn"], 
+                filled=True, rounded=True,
+                special_characters=True,rotate=False)
+graph = pydotplus.graph_from_dot_data(dot_data.getvalue())  
+Image(graph.create_png())
+
+
+# In[ ]:
+
+
+
+
